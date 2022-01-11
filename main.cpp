@@ -20,6 +20,9 @@ static cl::opt<std::string> Add("add", cl::desc("add a new todo item."),
 static cl::opt<int> Done("done", cl::desc("mark an item as done."),
                          cl::cat(TODOCategory));
 
+static cl::opt<int> Del("del", cl::desc("delete an item in the todo list."),
+                        cl::cat(TODOCategory));
+
 static cl::opt<bool> List("list", cl::desc("list all todo items"),
                           cl::cat(TODOCategory));
 
@@ -44,6 +47,19 @@ public:
     }
   }
 
+  void delItem(int index) {
+    int Index = 1;
+    std::string line;
+    std::ifstream todo{Location};
+    std::ofstream tmp{".tmp_todo"};
+    while (std::getline(todo, line)) {
+      if (Index++ != index) {
+        tmp << line << "\n";
+      }
+    }
+    std::rename(".tmp_todo", Location.c_str());
+  }
+
   void doneItem(int index) {
     int Index = 1;
     std::string line;
@@ -53,11 +69,11 @@ public:
       if (Index++ != index) {
         tmp << line << "\n";
       } else {
-		tmp << "- [x]" << line.substr(5) << "\n";
+        tmp << "- [x]" << line.substr(5) << "\n";
       }
     }
 
-	std::rename(".tmp_todo", Location.c_str());
+    std::rename(".tmp_todo", Location.c_str());
   }
 
   void clear() { std::ofstream todo{Location}; }
@@ -77,6 +93,10 @@ int main(int argc, char **argv) {
 
   if (Done > 0) {
     todo.doneItem(Done);
+  }
+
+  if (Del > 0) {
+    todo.delItem(Del);
   }
 
   if (List) {
